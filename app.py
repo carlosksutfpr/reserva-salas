@@ -99,9 +99,26 @@ st.subheader("Reservas do dia")
 
 if reservas:
     for r in reservas:
-        st.write(
-            f"**{r['horario']}** — {r['professor']} "
-            f"({r.get('disciplina') or 'Sem disciplina informada'})"
-        )
+        with st.container(border=True):
+            st.write(f"**Horário:** {r['horario']}")
+            st.write(f"**Professor:** {r['professor']}")
+            st.write(f"**Disciplina:** {r.get('disciplina') or 'Sem disciplina informada'}")
+
+            if r.get("observacao"):
+                st.write(f"**Observação:** {r['observacao']}")
+
+            if st.button("❌ Cancelar reserva", key=f"cancelar_{r['id']}"):
+                try:
+                    supabase.table("reservas") \
+                        .delete() \
+                        .eq("id", r["id"]) \
+                        .execute()
+
+                    st.success("Reserva cancelada com sucesso!")
+                    st.rerun()
+
+                except Exception as e:
+                    st.error("Não foi possível cancelar a reserva.")
+                    st.write(e)
 else:
     st.info("Nenhuma reserva para essa sala nesta data.")
